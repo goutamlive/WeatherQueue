@@ -1,0 +1,50 @@
+{
+    "countries": [
+      {
+          "code": "IN",
+          "name": "India",
+          "pollingIntervalInMs": 1000,
+          "cities": [
+            {
+                "code": "IN",
+                "name": "Chennai"
+            },
+            {
+                "code": "IN",
+                "name": "Bangalore"
+            },
+            {
+                "code": "IN",
+                "name": "Mumbai"
+            },
+            {
+                "code": "IN",
+                "name": "Kolkata"
+            }
+          ]
+        },
+      {
+        "code": "US",
+        "name": "USA",
+        "pollingIntervalInMs": 1200,
+        "cities": [
+          {
+            "code": "CA",
+            "name": "San_Francisco"
+          },
+          {
+            "code": "MA",
+            "name": "Boston"
+          },
+          {
+            "code": "NY",
+            "name": "New_York"
+          },
+          {
+            "code": "DC",
+            "name": "Washington"
+          }
+        ]
+      }
+    ]
+}
