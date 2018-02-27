@@ -45,22 +45,38 @@ public class Supervisor {
     @Autowired
     private WeatherRepository weatherRepository;
 
-    @Scheduled(fixedDelay = 5000)
+    @Autowired
+    private TaskScheduler taskScheduler;
+
+    private class TaskRunner implements Runnable {
+        private WorkerTask workerTask;
+
+        public TaskRunner(WorkerTask workerTask) {
+            this.workerTask = workerTask;
+        }
+
+        @Override
+        public void run() {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                String message = mapper.writeValueAsString(this.workerTask);
+                template.convertAndSend(workerQueue.getName(), message);
+                System.out.println(" [x] Sent '" + message + "'");
+            }catch (JsonProcessingException ex){
+                System.out.println("Cannot convert object to json");
+                ex.printStackTrace();
+            }
+        }
+    }
+
     public void doTask(){
         Constraint constraint = configService.constraint;
         splitTask(constraint);
     }
 
-    public void delegateSubTask(WorkerTask task) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            String message = mapper.writeValueAsString(task);
-            template.convertAndSend(workerQueue.getName(), message);
-            System.out.println(" [x] Sent '" + message + "'");
-        }catch (JsonProcessingException ex){
-            System.out.println("Cannot convert object to json");
-            ex.printStackTrace();
-        }
+    public void delegateSubTask(WorkerTask task, long pollingInterval) {
+        TaskRunner taskRunner = new TaskRunner(task);
+        taskScheduler.scheduleAtFixedRate(taskRunner, pollingInterval);
     }
 
     private void splitTask(Constraint constraint){
@@ -68,7 +84,7 @@ public class Supervisor {
         City city = null;
         for(int i = 0; i < constraint.countries.length; i++){
             country = constraint.countries[i];
-            delegateSubTask(getWorkerTask(country));
+            delegateSubTask(getWorkerTask(country), country.pollingIntervalInMs);
         }
     }
 
